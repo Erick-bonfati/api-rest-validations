@@ -5,10 +5,11 @@ class AutorController {
 
   static listarAutores = async(req, res, next) => {
     try {
-      const autoresResultado = await autores.find();
+      const autoresResultado = autores.find();
 
-      res.status(200).json(autoresResultado);
+      req.resultado = autoresResultado; // o resultado da requisição vai ser o resultado que recebemos nos parametros da nossa funcao "paginar"
       
+      next();
     } catch (erro) {
       next(erro);
     }

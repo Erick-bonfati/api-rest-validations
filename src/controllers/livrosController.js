@@ -5,11 +5,11 @@ class LivroController {
 
   static listarLivros = async (req, res, next) => {
     try {
-      const livrosResultado = await livros.find()
-        .populate("autor")
-        .exec();
+      const buscaLivros = livros.find();
 
-      res.status(200).json(livrosResultado);
+      req.resultado = buscaLivros;
+      
+      next();
     } catch (erro) {
       next(erro);
     }
@@ -19,9 +19,9 @@ class LivroController {
     try {
       const id = req.params.id;
 
-      const livroResultados = await livros.findById(id)
-        .populate("autor", "nome")
-        .exec();
+      const livroResultados = await livros
+        .findById(id, {}, { autopopulate: false })
+        .populate("autor");  // removemos o segundo parâmetro "nome", e agora essa população mostra todas as informações do autor
 
       if(livroResultados !== null) {
         res.status(200).send(livroResultados);
@@ -85,11 +85,13 @@ class LivroController {
       const busca = await processaBusca(req.query);
 
       if(busca !== null){
-        const livrosResultado = await livros
+        const livrosResultado = livros
           .find(busca)
           .populate("autor");
 
-        res.status(200).send(livrosResultado);
+        req.resultado = livrosResultado; // o resultado da requisição vai ser o resultado que recebemos nos parametros da nossa funcao "paginar"
+
+        next(); // executando o primeiro middlewares encontrado que neste caso é o "paginar"
       } else {
         res.status(200).json({message: "Autor não encontrado!"});
       }
